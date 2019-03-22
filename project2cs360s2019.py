@@ -14,7 +14,7 @@ def Read_file(filename):
     for key in heros_membership:
         if heros_membership[key] != 0:
             initial_level += 1
-    return algorithm, initial_level, heros_pool, heros_membership
+    return algorithm, initial_level, heros_pool, heros_membership, hero_id_list
 
 def Write_output(best_hero):
     output_file = open("output.txt","w")
@@ -64,16 +64,19 @@ class State:
 
 def Minmax(state):
     global heros_pool
+    global hero_id_list
     
     best_hero = None
     advantage = -float('inf')
     state_children = {}
+    state_children_list = []
     
-    for hero_id in state.heros_membership:
+    for hero_id in hero_id_list:
         if state.heros_membership[hero_id] == 0:
             state_children[hero_id] = state.next_state(hero_id)
+            state_children_list.append(hero_id)
             
-    for hero_id in state_children:
+    for hero_id in state_children_list:
         new_advantage = Min_value(state_children[hero_id])
         if new_advantage > advantage or (new_advantage==advantage and hero_id<best_hero):
             advantage = new_advantage
@@ -83,18 +86,21 @@ def Minmax(state):
 
 def Max_value(state):
     global heros_pool
+    global hero_id_list
     
     if state.level >= 10:
         return state.cal_advantage(heros_pool)
     
     advantage = -float('inf')
     state_children = {}
+    state_children_list = []
     
-    for hero_id in state.heros_membership:
+    for hero_id in hero_id_list:
         if state.heros_membership[hero_id] == 0:
             state_children[hero_id] = state.next_state(hero_id)
+            state_children_list.append(hero_id)
             
-    for hero_id in state_children:
+    for hero_id in state_children_list:
         new_advantage = Min_value(state_children[hero_id])
         advantage = max(advantage, new_advantage)
             
@@ -102,19 +108,21 @@ def Max_value(state):
 
 def Min_value(state):
     global heros_pool
+    global hero_id_list
     
     if state.level >= 10:
         return state.cal_advantage(heros_pool)
     
     advantage = float('inf')
-    
     state_children = {}
+    state_children_list = []
     
-    for hero_id in state.heros_membership:
+    for hero_id in hero_id_list:
         if state.heros_membership[hero_id] == 0:
             state_children[hero_id] = state.next_state(hero_id)
+            state_children_list.append(hero_id)
 
-    for hero_id in state_children:
+    for hero_id in state_children_list:
         new_advantage = Max_value(state_children[hero_id])
         advantage = min(advantage, new_advantage)
 
@@ -123,16 +131,19 @@ def Min_value(state):
 # Alpha_beta_pruning
 def Alpha_beta_minmax(state):
     global heros_pool
+    global hero_id_list
     
     best_hero = None
     advantage = -float('inf')
     state_children = {}
+    state_children_list = []
     
-    for hero_id in state.heros_membership:
+    for hero_id in hero_id_list:
         if state.heros_membership[hero_id] == 0:
             state_children[hero_id] = state.next_state(hero_id)
+            state_children_list.append(hero_id)
             
-    for hero_id in state_children:
+    for hero_id in state_children_list:
         new_advantage = Alpha_beta_min_value(state_children[hero_id], -float('inf'), float('inf'))
         if new_advantage > advantage or (new_advantage==advantage and hero_id<best_hero):
             advantage = new_advantage
@@ -143,18 +154,21 @@ def Alpha_beta_minmax(state):
 
 def Alpha_beta_max_value(state, alpha, beta):
     global heros_pool
+    global hero_id_list
     
     if state.level >= 10:
         return state.cal_advantage(heros_pool)
     
     advantage = -float('inf')
     state_children = {}
+    state_children_list = []
     
-    for hero_id in state.heros_membership:
+    for hero_id in hero_id_list:
         if state.heros_membership[hero_id] == 0:
             state_children[hero_id] = state.next_state(hero_id)
+            state_children_list.append(hero_id)
             
-    for hero_id in state_children:
+    for hero_id in state_children_list:
         new_advantage = Alpha_beta_min_value(state_children[hero_id], alpha, beta)
         advantage = max(advantage, new_advantage)
         if advantage >= beta:
@@ -165,19 +179,21 @@ def Alpha_beta_max_value(state, alpha, beta):
 
 def Alpha_beta_min_value(state, alpha, beta):
     global heros_pool
+    global hero_id_list
     
     if state.level >= 10:
         return state.cal_advantage(heros_pool)
     
     advantage = float('inf')
-    
     state_children = {}
+    state_children_list = []
     
-    for hero_id in state.heros_membership:
+    for hero_id in hero_id_list:
         if state.heros_membership[hero_id] == 0:
             state_children[hero_id] = state.next_state(hero_id)
+            state_children_list.append(hero_id)
 
-    for hero_id in state_children:
+    for hero_id in state_children_list:
         new_advantage = Alpha_beta_max_value(state_children[hero_id], alpha, beta)
         advantage = min(advantage, new_advantage)
         if advantage <= alpha:
@@ -189,7 +205,8 @@ def Alpha_beta_min_value(state, alpha, beta):
 
 if __name__== "__main__":
     filename = "input"
-    algorithm, initial_level, heros_pool, membership = Read_file(filename)
+    algorithm, initial_level, heros_pool, membership, hero_id_list = Read_file(filename)
+    hero_id_list.sort()
     initial_state = State(initial_level,1,membership)
 
     if algorithm == "ab":
